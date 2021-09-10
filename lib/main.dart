@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_google_map_coord/view/page/button_page/button_page.dart';
 import 'package:flutter_google_map_coord/view/page/map/map_click.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 void main() {
   runApp(MyApp());
@@ -11,9 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: Size(360, 690),
-
-
-      builder:()=> MaterialApp(
+      builder: () => GetMaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
           primarySwatch: Colors.blue,
@@ -43,9 +43,8 @@ class _MyHomePageState extends State<MyHomePage> {
         //  designSize: Size(360, 690),
         orientation: Orientation.portrait);
 
-
     return Scaffold(
-      body: SafeArea(child: MapClickPage()),
+      body: SafeArea(child: ButtonPage()),
     );
   }
 }
