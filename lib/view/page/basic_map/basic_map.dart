@@ -72,11 +72,16 @@ class _BasicMapPageState extends State<BasicMapPage> {
           _controller.complete(controller);
         },
       ),
+
+
       // floatingActionButton: FloatingActionButton.extended(
       //   onPressed: _goToTheLake,
       //   label: Text('To the lake!'),
       //   icon: Icon(Icons.directions_boat),
       // ),
+
+
+
     );
   }
 

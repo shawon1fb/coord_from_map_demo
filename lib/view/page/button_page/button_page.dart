@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_google_map_coord/view/page/basic_map/basic_map.dart';
+import 'package:flutter_google_map_coord/view/page/map/map_click.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -46,13 +47,14 @@ class _ButtonPageState extends State<ButtonPage> {
         zoom: 16.151926040649414);
     kLake = _kLake;
 
-    buttontext= "my coordinates:=> ${kLake?.target}";
+    buttontext = "my coordinates:=> ${kLake?.target}";
     setState(() {});
   }
 
   CameraPosition? kLake;
 
-  String buttontext="please wait...";
+  String buttontext = "please wait...";
+
   @override
   void initState() {
     // TODO: implement initState
@@ -66,24 +68,44 @@ class _ButtonPageState extends State<ButtonPage> {
       body: SafeArea(
         child: Container(
           child: Center(
-            child: InkWell(
-              onTap: () {
-                if (kLake != null)
-                  Get.to(BasicMapPage(
-                    kGooglePlex: kLake!,
-                  ));
-                else{
-
-                }
-              },
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                InkWell(
+                  onTap: () {
+                    if (kLake != null)
+                      Get.to(BasicMapPage(
+                        kGooglePlex: kLake!,
+                      ));
+                    else {}
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text("$buttontext"),
+                  ),
                 ),
-                child: Text("$buttontext"),
-              ),
+                SizedBox(
+                  height: 20,
+                ),
+                InkWell(
+                  onTap: () {
+                    Get.to(MapClickPage());
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text("Tap to pick location"),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

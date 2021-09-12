@@ -41,6 +41,7 @@ class _MapClickBodyState extends State<_MapClickBody> {
   LatLng? _lastLongPress;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   MarkerId? selectedMarker;
+
   getLocation() async {
     Location location = new Location();
 
@@ -68,7 +69,8 @@ class _MapClickBodyState extends State<_MapClickBody> {
 
     CameraPosition _kLake = CameraPosition(
         bearing: 192.8334901395799,
-        target: LatLng(_locationData.latitude??25.00, _locationData.longitude??90.98),
+        target: LatLng(
+            _locationData.latitude ?? 25.00, _locationData.longitude ?? 90.98),
         //LatLng(37.43296265331129, -122.08832357078792),
         tilt: 50.440717697143555,
         zoom: 16.151926040649414);
@@ -88,6 +90,7 @@ class _MapClickBodyState extends State<_MapClickBody> {
     super.initState();
     getLocation();
   }
+
   int _markerIdCounter = 1;
 
   void _remove(MarkerId markerId) {
@@ -97,13 +100,13 @@ class _MapClickBodyState extends State<_MapClickBody> {
       }
     });
   }
+
   void _add(LatLng pos) {
     final int markerCount = markers.length;
 
     if (markerCount == 12) {
       return;
     }
-
 
     final String markerIdVal = 'marker_id_$_markerIdCounter';
     _markerIdCounter++;
@@ -125,7 +128,6 @@ class _MapClickBodyState extends State<_MapClickBody> {
       markers[markerId] = marker;
     });
   }
-
 
   void _onMarkerTapped(MarkerId markerId) {
     final Marker? tappedMarker = markers[markerId];
@@ -219,10 +221,12 @@ class _MapClickBodyState extends State<_MapClickBody> {
       )));
     }
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: columnChildren,
+    return Scaffold(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: columnChildren,
+      ),
     );
   }
 
