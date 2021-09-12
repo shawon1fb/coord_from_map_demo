@@ -65,7 +65,7 @@ class _BasicMapPageState extends State<BasicMapPage> {
     return new Scaffold(
       appBar: AppBar(title: Text("basic map"),),
       body: GoogleMap(
-        mapType: MapType.hybrid,
+        mapType: MapType.normal,
         initialCameraPosition: widget.kGooglePlex,
         markers: Set<Marker>.of(markers.values),
         onMapCreated: (GoogleMapController controller) {
