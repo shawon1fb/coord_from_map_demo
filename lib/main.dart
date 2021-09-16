@@ -1,3 +1,7 @@
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
+import 'dart:typed_data';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -7,9 +11,12 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import 'device_model.dart';
+import 'firestore_model.dart';
+
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    'high_importance_channel', // id
-    'High Importance Notifications', // title
+    'high_importance_channel1', // id
+    'High Importance Notifications1', // title
     'This channel is used for important notifications.', // description
     importance: Importance.high,
     playSound: true);
@@ -20,24 +27,96 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   print('A bg message just showed up :  ${message.messageId}');
-}
+  RemoteNotification? notification = message.notification;
+  AndroidNotification? android = message.notification?.android;
+  if (notification != null && android != null) {
+    title = notification.title ?? "";
+    body = notification.body ?? "";
 
+    flutterLocalNotificationsPlugin.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        NotificationDetails(
+
+
+          android: AndroidNotificationDetails(
+            // channelId ?? 'your channel id',
+            'your channel id',
+            'your channel name',
+            'your channel description',
+            sound: RawResourceAndroidNotificationSound('sound'),
+            autoCancel: false,
+            playSound: true,
+            enableVibration: true,
+            ledOnMs: 1,
+            ledOffMs: 1,
+
+            priority: Priority.high,
+            importance: Importance.max,
+            color: Color(0xff198C5F),
+            // ledColor: Colors.green,
+
+            icon: "app_icon_4",
+            //icon: "food",
+            // largeIcon: DrawableResourceAndroidBitmap("logoramadan"),
+            // ongoing: true,
+          ),
+        ));
+  }
+}
+String title = "";
+String body = "";
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
 
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,
     badge: true,
     sound: true,
   );
+
+ await init();
   runApp(MyApp());
+}
+
+
+Future<void> init() async {
+  final AndroidInitializationSettings initializationSettingsAndroid =
+  AndroidInitializationSettings('app_icon_4');
+
+  final IOSInitializationSettings initializationSettingsIOS =
+  IOSInitializationSettings(
+    requestSoundPermission: false,
+    requestBadgePermission: false,
+    requestAlertPermission: false,
+
+  );
+
+  final InitializationSettings initializationSettings =
+  InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+      macOS: null);
+
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+      onSelectNotification: selectNotification);
+}
+
+
+Future selectNotification(String? payload) async {
+  //Handle notification tapped logic here
+
+  print("local notification payload");
+  print(payload);
 }
 
 class MyApp extends StatelessWidget {
@@ -71,26 +150,80 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
+  getToken() {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    messaging.getToken().then((value) async {
+      print("fcmToken:=> $value");
+      await DeviceModel.getInstance.getInfo(value);
+      await DeviceModel.getInstance.saveDataToFireBase();
+    });
+  }
+
+
+
+  getNotification() async {
+    NotificationAppLaunchDetails? d =
+        await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
+    print(d);
+  }
+
+  Future<void> showInsistentNotification() async {
+    const int insistentFlag = 4;
+    final AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+            "channel_id", 'Channel Name', "Channel Description",
+            importance: Importance.max,
+            priority: Priority.high,
+            ticker: "ticker",
+            additionalFlags: Int32List.fromList(<int>[insistentFlag]));
+    final NotificationDetails notificationDetails =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(0, 'Flutter Local Notification',
+        'Flutter Insistent Notification', notificationDetails,
+        payload: 'Destination Screen(Insistent Notification)');
+  }
+
   @override
   void initState() {
     super.initState();
+    getNotification();
+    getToken();
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('onMessage');
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
+
       if (notification != null && android != null) {
+        title = notification.title ?? "";
+        body = notification.body ?? "";
+        if (mounted) setState(() {});
+
         flutterLocalNotificationsPlugin.show(
             notification.hashCode,
             notification.title,
             notification.body,
             NotificationDetails(
               android: AndroidNotificationDetails(
-                channel.id,
-                channel.name,
-                channel.description,
-                color: Colors.blue,
+                // channelId ?? 'your channel id',
+                'your channel id',
+                'your channel name',
+                'your channel description',
+                sound: RawResourceAndroidNotificationSound('sound'),
+                autoCancel: false,
                 playSound: true,
-                icon: '@mipmap/ic_launcher',
+                enableVibration: true,
+                ledOnMs: 1,
+                ledOffMs: 1,
+
+                priority: Priority.high,
+                importance: Importance.max,
+                color: Color(0xff198C5F),
+                // ledColor: Colors.green,
+
+                icon: "app_icon_4",
+                //icon: "food",
+                // largeIcon: DrawableResourceAndroidBitmap("logoramadan"),
+                // ongoing: true,
               ),
             ));
       }
@@ -101,6 +234,10 @@ class _MyHomePageState extends State<MyHomePage> {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
       if (notification != null && android != null) {
+        title = notification.title ?? "";
+        body = notification.body ?? "";
+        if (mounted) setState(() {});
+
         showDialog(
             context: context,
             builder: (_) {
@@ -124,15 +261,31 @@ class _MyHomePageState extends State<MyHomePage> {
     });
     flutterLocalNotificationsPlugin.show(
       0,
-      "Testing $_counter",
+      "Testing s  $_counter",
       "How you doin ?",
       NotificationDetails(
         android: AndroidNotificationDetails(
-            channel.id, channel.name, channel.description,
-            importance: Importance.high,
-            color: Colors.blue,
-            playSound: true,
-            icon: '@mipmap/ic_launcher'),
+          // channelId ?? 'your channel id',
+          'your channel id',
+          'your channel name',
+          'your channel description',
+          sound: RawResourceAndroidNotificationSound('sound'),
+          autoCancel: false,
+          playSound: true,
+          enableVibration: true,
+          ledOnMs: 1,
+          ledOffMs: 1,
+
+          priority: Priority.high,
+          importance: Importance.max,
+          color: Color(0xff198C5F),
+          // ledColor: Colors.green,
+
+          icon: "app_icon_4",
+          //icon: "food",
+          // largeIcon: DrawableResourceAndroidBitmap("logoramadan"),
+          // ongoing: true,
+        ),
       ),
     );
   }
@@ -148,17 +301,23 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'You have pushed the button this many times:',
+            "Title : "+  title,
+            ),
+            SizedBox(
+              height: 10,
             ),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+             "body : "+ body,
+              style: TextStyle(
+                fontWeight: FontWeight.normal,
+                fontSize: 14.0,
+              ),
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: showNotification,
+        onPressed: showInsistentNotification,
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ),

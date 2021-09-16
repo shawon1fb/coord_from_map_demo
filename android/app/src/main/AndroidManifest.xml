@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.signaturependudriver.flutter_google_map_coord">
+    <uses-permission android:name="android.permission.INTERNET"/>
    <application
         android:label="flutter_google_map_coord"
         android:icon="@mipmap/ic_launcher">
