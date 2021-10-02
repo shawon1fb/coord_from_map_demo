@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 abstract class GoogleMapExampleAppPage extends StatelessWidget {
   const GoogleMapExampleAppPage(this.leading, this.title);
@@ -102,6 +103,7 @@ class _MapClickBodyState extends State<_MapClickBody> {
   }
 
   void _add(LatLng pos) {
+    markers.clear();
     final int markerCount = markers.length;
 
     if (markerCount == 12) {
@@ -123,7 +125,6 @@ class _MapClickBodyState extends State<_MapClickBody> {
         _onMarkerDragEnd(markerId, position);
       },
     );
-
     setState(() {
       markers[markerId] = marker;
     });
@@ -188,6 +189,9 @@ class _MapClickBodyState extends State<_MapClickBody> {
         });
       },
       markers: Set<Marker>.of(markers.values),
+      compassEnabled: true,
+      // liteModeEnabled: true,
+      mapType: MapType.normal,
       onLongPress: (LatLng pos) {
         _add(pos);
         setState(() {
@@ -219,6 +223,29 @@ class _MapClickBodyState extends State<_MapClickBody> {
         lastLongPress,
         textAlign: TextAlign.center,
       )));
+      columnChildren.add(InkWell(
+        onTap: () {
+          if (_lastTap != null) {
+            LatLng l = _lastTap!;
+            MapUtils.openMap(l.latitude, l.longitude);
+          }else{
+            print("last tap is null");
+          }
+        },
+        child: Container(
+          margin: EdgeInsets.all(10),
+          padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+          decoration: BoxDecoration(
+            color: Colors.blue,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Center(
+              child: Text(
+            "Open on google map",
+            textAlign: TextAlign.center,
+          )),
+        ),
+      ));
     }
 
     return Scaffold(
@@ -236,5 +263,19 @@ class _MapClickBodyState extends State<_MapClickBody> {
     setState(() {
       mapController = controller;
     });
+  }
+}
+
+class MapUtils {
+  MapUtils._();
+
+  static Future<void> openMap(double latitude, double longitude) async {
+    String googleUrl =
+        'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+    if (await canLaunch(googleUrl)) {
+      await launch(googleUrl);
+    } else {
+      throw 'Could not open the map.';
+    }
   }
 }
